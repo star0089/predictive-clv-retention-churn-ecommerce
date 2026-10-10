@@ -1,0 +1,26 @@
+# Local datasets and generated analysis tables
+data/raw/
+data/interim/
+data/processed/
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system artifacts
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
