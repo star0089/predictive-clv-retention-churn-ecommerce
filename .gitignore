@@ -1,0 +1,22 @@
+# Raw/local data
+data_raw/
+data/
+*.csv
+*.xlsx
+*.parquet
+
+# Jupyter / Python
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+*.env
