@@ -130,8 +130,8 @@ def train_and_score_churn(snapshots: pd.DataFrame, scoring_features: pd.DataFram
         raise ValueError("Temporal holdout does not contain both target classes.")
     estimator = Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
-        ("model", RandomForestClassifier(n_estimators=300, max_depth=10, min_samples_leaf=20,
-                                         class_weight="balanced_subsample", n_jobs=-1, random_state=42)),
+        ("model", RandomForestClassifier(n_estimators=100, max_depth=10, min_samples_leaf=20,
+                                         class_weight=None, n_jobs=2, random_state=42)),
     ])
     estimator.fit(train[FEATURE_COLUMNS], train["churned_240d"])
     test_prob = estimator.predict_proba(test[FEATURE_COLUMNS])[:, 1]
@@ -146,8 +146,14 @@ def train_and_score_churn(snapshots: pd.DataFrame, scoring_features: pd.DataFram
         "average_precision": float(average_precision_score(test["churned_240d"], test_prob)),
         "roc_auc": float(roc_auc_score(test["churned_240d"], test_prob)),
         "brier_score": float(brier_score_loss(test["churned_240d"], test_prob)),
+        "average_precision_prevalence_baseline": float(test["churned_240d"].mean()),
+        "brier_score_prevalence_baseline": float(brier_score_loss(
+            test["churned_240d"],
+            np.repeat(train["churned_240d"].mean(), len(test)),
+        )),
         **_ranking_metrics(test["churned_240d"], test_prob),
         "validation_note": "Chronological snapshot holdout; a customer can appear in multiple dates, so this is not an independent customer-group holdout.",
+        "quality_note": "Interpret average precision relative to prevalence. High prevalence with lift@10% close to 1 indicates weak targeting discrimination.",
     }
     estimator.fit(snapshots[FEATURE_COLUMNS], snapshots["churned_240d"])
     score = scoring_features.copy()
