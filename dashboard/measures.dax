@@ -1,0 +1,76 @@
+-- Import customer_dashboard.csv as customer_dashboard.
+-- Import monthly_kpis.csv as monthly_kpis.
+-- Import cohort_retention.csv as cohort_retention.
+-- Use these measures with the corresponding report pages.
+
+Total Customers =
+DISTINCTCOUNT ( customer_dashboard[customer_unique_id] )
+
+Repeat Customers =
+CALCULATE (
+    [Total Customers],
+    FILTER ( customer_dashboard, customer_dashboard[frequency] > 1 )
+)
+
+Repeat Customer Rate =
+DIVIDE ( [Repeat Customers], [Total Customers] )
+
+Customer Paid Value =
+SUM ( customer_dashboard[monetary] )
+
+Average Paid Value per Customer =
+DIVIDE ( [Customer Paid Value], [Total Customers] )
+
+Average Order Value =
+AVERAGE ( customer_dashboard[average_order_value] )
+
+Average Recency Days =
+AVERAGE ( customer_dashboard[recency] )
+
+Average Purchase Frequency =
+AVERAGE ( customer_dashboard[frequency] )
+
+High Value Customers =
+CALCULATE (
+    [Total Customers],
+    customer_dashboard[RFM_segment] = "High Value"
+)
+
+Champions =
+CALCULATE (
+    [Total Customers],
+    customer_dashboard[RFM_segment] = "Champions"
+)
+
+High Relative Churn-Risk Customers =
+CALCULATE (
+    [Total Customers],
+    customer_dashboard[risk_band] = "High"
+)
+
+Average Predicted 240d Churn Score =
+AVERAGE ( customer_dashboard[p_churn_240d] )
+
+Predicted 90d Paid Value =
+SUM ( customer_dashboard[predicted_paid_value_90d] )
+
+Predicted 180d Paid Value =
+SUM ( customer_dashboard[predicted_paid_value_180d] )
+
+Predicted 365d Paid Value =
+SUM ( customer_dashboard[predicted_paid_value_365d] )
+
+365d Paid Value at Risk Proxy =
+SUM ( customer_dashboard[paid_value_at_risk_365d_proxy] )
+
+Delivered Orders =
+SUM ( monthly_kpis[orders] )
+
+Monthly Active Customers =
+SUM ( monthly_kpis[customers] )
+
+Monthly Customer Paid Value =
+SUM ( monthly_kpis[paid_order_value] )
+
+Average Monthly Retention Activity =
+AVERAGE ( cohort_retention[retention_pct] )

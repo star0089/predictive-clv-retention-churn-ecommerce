@@ -87,6 +87,8 @@ predictive-clv-retention-churn-ecommerce/
 ├── docs/
 ├── reports/
 ├── dashboard/
+│   ├── measures.dax
+│   └── report_layout.md
 ├── run_pipeline.py
 ├── pyproject.toml
 ├── requirements.txt
