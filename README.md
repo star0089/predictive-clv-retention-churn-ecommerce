@@ -1,72 +1,154 @@
-# Predictive CLV, Retention & Churn Intelligence
+# Predictive Customer Lifetime Value, Retention & Churn Intelligence
 
-Portfolio data science project using the Olist Brazilian E-Commerce dataset.
+An end-to-end customer analytics portfolio project built on the **Olist Brazilian E-Commerce Public Dataset**. The project connects customer behavior, retention, churn risk and predicted future customer-paid value, with clear limits around profitability and marketing attribution.
 
-## Current verified progress
+## Project objective
 
-- Unique customers: **96,096**
-- Naive repeat rate: **~3.12%**
-- First-order review repeat rate: **1.71% (1★)** to **2.18% (5★)**; association only
-- RFM segmentation: **completed**
-- Cohort retention analysis: **completed**
-- Churn definition: **in progress**
+Build a reproducible workflow that answers:
 
-### RFM highlights
-- New / Recent Customers: **38,481 (40.04%)**
-- Lost / Inactive: **38,358 (39.92%)**
-- High Value: **7,552 (7.86%)**, contributing **13.40% of revenue**
-- Champions: **34**, avg frequency **4.97**, avg monetary **851.88**
+1. Which customers are purchasing and how often?
+2. Which customer cohorts return over time?
+3. Which active customers are unlikely to purchase again?
+4. What customer-paid order value may be generated over future horizons?
+5. How should CRM teams prioritize customers while respecting the limits of the available evidence?
 
-### Cohort retention highlights
-Average monthly activity retention:
-- Month 1: **0.48%**
-- Month 2: **0.31%**
-- Month 3: **0.25%**
-- Later months: generally around **0.2–0.3%**
+## Current verified exploratory findings
 
-Comparable Month-1 retention is broadly flat between 2017 and 2018 after accounting for incomplete end-of-dataset cohorts.
+These figures are from the earlier hands-on exploratory notebooks. They are not presented as outputs from the newer canonical pipeline, which uses delivered orders only and may produce different counts.
 
-### Churn-definition work
-Observed repeat-purchase gaps:
-- Median: **28 days**
-- 75th percentile: **119 days**
-- 80th percentile: **151 days**
-- 90th percentile: **241 days**
+- Persistent customer IDs observed: **96,096**
+- More-than-one-order customers: **2,997**
+- Exploratory repeat-customer rate: **about 3.12%**
+- First-order review association: repeat rate ranged from **1.71% (1-star)** to **2.18% (5-star)**; this is observational, not causal.
+- RFM exploratory segments: New / Recent **38,481 (40.04%)**; Lost / Inactive **38,358 (39.92%)**; High Value **7,552 (7.86%)**.
+- High Value segment contributed **13.40%** of exploratory customer-paid value.
+- Monthly activity retention: Month 1 **0.48%**, Month 2 **0.31%**, Month 3 **0.25%**.
+- Comparable Month-1 retention was broadly flat: 2017 about **0.51%**, Jan-Jul 2018 about **0.49%**.
 
-Candidate inactivity thresholds capture:
-- 60 days: **62.87%**
-- 90 days: **69.63%**
-- 120 days: **75.43%**
-- 180 days: **83.86%**
+### Working churn definition
 
-**Working churn threshold: 180 days**, pending validation on behavioral repeat gaps (>7 days) and a leakage-safe observation/prediction-window design.
+Behavioral repeat gaps longer than seven days produced the following observed coverage:
+
+| Inactivity threshold | Behavioral repeat gaps within threshold |
+|---:|---:|
+| 180 days | 74.42% |
+| 210 days | 79.96% |
+| 240 days | 84.04% |
+| 270 days | 87.68% |
+
+The project uses **240 days** as its working no-return horizon. Customers are eligible for scoring when they purchased within the previous **180 days**. This is a project-specific behavioral definition, not a universal churn standard.
 
 ## Repository structure
 
 ```text
-notebooks/
-  01_data_understanding.ipynb
-  02_customer_behavior.ipynb
-  03_rfm_analysis.ipynb
-  04_retention_analysis.ipynb
-  05_churn_definition.ipynb
-src/
-docs/
-reports/
-dashboard/
-.gitignore
-README.md
-requirements.txt
+predictive-clv-retention-churn-ecommerce/
+├── notebooks/
+│   ├── 01_data_understanding.ipynb
+│   ├── 02_customer_behavior.ipynb
+│   ├── 03_rfm_analysis.ipynb
+│   ├── 04_retention_analysis.ipynb
+│   ├── 05_churn_definition.ipynb
+│   ├── 06_feature_engineering.ipynb
+│   ├── 07_churn_modeling.ipynb
+│   ├── 08_predictive_customer_value.ipynb
+│   └── 09_business_economics_and_dashboard.ipynb
+├── src/
+│   ├── data_loader.py
+│   ├── analytics.py
+│   ├── churn.py
+│   ├── clv.py
+│   ├── marketing.py
+│   └── pipeline.py
+├── tests/
+├── docs/
+├── reports/
+├── dashboard/
+├── run_pipeline.py
+├── pyproject.toml
+├── requirements.txt
+└── README.md
 ```
 
-## Next
-1. Finalize churn definition
-2. Feature engineering
-3. Churn prediction
-4. Predictive CLV
-5. CLV × churn strategy
-6. Profitability / CAC / ROAS
-7. Power BI
-8. Executive recommendations
+## Quick start (Windows PowerShell)
 
-Raw datasets, secrets, caches, checkpoints, and temporary files are intentionally excluded.
+1. Download the Olist dataset and place its original CSV files in a local folder named data_raw at the repository root. At minimum:
+
+   - olist_customers_dataset.csv
+   - olist_orders_dataset.csv
+   - olist_order_items_dataset.csv
+   - olist_order_payments_dataset.csv
+
+2. Create the environment and install dependencies:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+```
+
+3. Run the complete pipeline from the repository root:
+
+```powershell
+python run_pipeline.py
+```
+
+4. Run automated checks:
+
+```powershell
+pytest
+```
+
+See [docs/reproducibility.md](docs/reproducibility.md) for details.
+
+## Pipeline outputs
+
+Generated locally in outputs/ (not committed):
+
+- data_quality_report.csv
+- customer_master_rfm.csv
+- rfm_segment_summary.csv
+- cohort_retention.csv
+- monthly_kpis.csv
+- churn_training_snapshots.csv
+- churn_risk_predictions.csv (if model training succeeds)
+- future_paid_value_predictions.csv (for successfully trained horizons)
+- customer_dashboard.csv
+- model metric JSON files
+
+Fitted models are stored in models/ and are also excluded from Git.
+
+## Modeling design
+
+- Completed-purchase population: delivered orders.
+- Customer grain: customer_unique_id.
+- Payment installments are aggregated to order_id before joining.
+- Churn target: no delivered purchase in the next 240 days among customers active in the previous 180 days.
+- Churn features use transactions on or before the snapshot date only.
+- Churn evaluation uses a chronological snapshot holdout and reports average precision, ROC-AUC, Brier score, precision@10%, recall@10% and lift@10%.
+- Future paid-value models target 90, 180 and 365 days separately.
+- A 730-day / 24-month value model is intentionally not estimated because reliable follow-up is insufficient.
+
+## Important data limitations
+
+The standard Olist dataset does not provide complete product cost, fulfilment cost, refund/return cost, customer-support cost, campaign spend, customer-level CAC or campaign exposure. Therefore:
+
+- predicted paid value is **not** contribution-margin CLV or profit;
+- CAC and ROAS are unavailable unless genuine external marketing data is supplied;
+- churn probability × predicted paid value is only a value-at-risk ranking proxy, not expected saved value;
+- causal retention impact requires controlled experiments or uplift modeling.
+
+The optional marketing input schema is documented in [docs/limitations.md](docs/limitations.md). Never invent missing business data.
+
+## Documentation
+
+- [Data dictionary](docs/data_dictionary.md)
+- [Modeling strategy](docs/modeling_strategy.md)
+- [Data and model limitations](docs/limitations.md)
+- [Dashboard specification](docs/dashboard_spec.md)
+- [Reproducibility guide](docs/reproducibility.md)
+- [Project progress log](reports/progress_log.md)
+
+## Project status
+
+The repository now contains the end-to-end code structure, practice notebooks, documentation, and basic tests. **The full pipeline has not yet been executed against the local raw dataset in this environment.** Model metrics and generated outputs will be added only after a real run and validation; no synthetic performance numbers are presented as Olist results.
