@@ -38,6 +38,30 @@ Behavioral repeat gaps longer than seven days produced the following observed co
 
 The project uses **240 days** as its working no-return horizon. Customers are eligible for scoring when they purchased within the previous **180 days**. This is a project-specific behavioral definition, not a universal churn standard.
 
+## Actual dataset run — 2026-11-20
+
+The complete pipeline was executed against the Olist archive supplied for this project.
+
+| Measure | Verified result |
+|---|---:|
+| Delivered orders | **96,478** |
+| Persistent customers | **93,358** |
+| Customers with multiple delivered orders | **2,801** |
+| Repeat-customer rate | **3.00%** |
+| RFM segments | **7** |
+| Churn training snapshots | **168,970** |
+| Active customers scored | **37,559** |
+
+Canonical results use delivered orders and an analysis end of **2018-08-29 15:00:00**, the latest delivered purchase timestamp available before the configured 2018-08-31 cutoff.
+
+### Model validation summary
+
+The churn target has **98.27%** prevalence in the temporal test set. ROC-AUC is **0.612** and lift@10% is **1.009**. The current churn model is not sufficiently discriminative for production retention targeting.
+
+Future paid-value models show some ranking signal: their top 10% capture about **20.5%–25.1%** of future paid value. However, pointwise MAE is worse than a zero-value baseline, and R² is near zero. Treat these models as exploratory ranking baselines, not accurate individual CLV estimates.
+
+See [reports/model_evaluation.md](reports/model_evaluation.md) and [reports/dataset_run_summary.md](reports/dataset_run_summary.md) for complete results.
+
 ## Repository structure
 
 ```text
@@ -151,4 +175,4 @@ The optional marketing input schema is documented in [docs/limitations.md](docs/
 
 ## Project status
 
-The repository now contains the end-to-end code structure, practice notebooks, documentation, and basic tests. **The full pipeline has not yet been executed against the local raw dataset in this environment.** Model metrics and generated outputs will be added only after a real run and validation; no synthetic performance numbers are presented as Olist results.
+The repository contains the end-to-end pipeline, nine practice notebooks, reusable source modules, documentation, dashboard specification, and automated tests. The complete pipeline has been run against the supplied archive and **5 automated tests pass**. Customer-level outputs and fitted models remain local and are not committed. Model weaknesses and unavailable business-economics fields are documented rather than hidden.

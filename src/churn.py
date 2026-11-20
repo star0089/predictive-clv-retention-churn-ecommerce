@@ -53,9 +53,10 @@ def build_features_at_cutoff(order_level: pd.DataFrame, cutoff_date: pd.Timestam
         freight_paid_180d=("freight_paid", "sum")
     )
     base = base.join(basket, how="left")
-    ordered = history.sort_values(["customer_unique_id", "order_purchase_timestamp"]).copy()
-    ordered["gap_days"] = ordered.groupby("customer_unique_id")["order_purchase_timestamp"].diff().dt.total_seconds() / 86400
-    gap_stats = ordered.groupby("customer_unique_id")["gap_days"].agg(
+    # prepare_order_level sorts once; filtering preserves customer/date order.
+    # Avoid sorting the full historical table again at every monthly snapshot.
+    history["gap_days"] = history.groupby("customer_unique_id")["order_purchase_timestamp"].diff().dt.total_seconds() / 86400
+    gap_stats = history.groupby("customer_unique_id")["gap_days"].agg(
         purchase_gap_mean_days="mean", purchase_gap_std_days="std"
     )
     base = base.join(gap_stats, how="left")

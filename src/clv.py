@@ -55,16 +55,23 @@ def train_clv_horizon(snapshots: pd.DataFrame, scoring_features: pd.DataFrame,
     test = snapshots[pd.to_datetime(snapshots["snapshot_date"]).isin(test_dates)]
     if train.empty or test.empty:
         raise ValueError(f"Unable to create chronological holdout for {horizon_days}-day value model.")
+    training_rows = train.sample(n=min(30000, len(train)), random_state=42) if len(train) > 30000 else train.copy()
     model = Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
         ("regressor", RandomForestRegressor(
-            n_estimators=250, max_depth=12, min_samples_leaf=20,
-            n_jobs=-1, random_state=42,
+            n_estimators=30, max_depth=6, min_samples_leaf=200,
+            max_samples=0.7, n_jobs=1, random_state=42,
         )),
     ])
-    model.fit(train[FEATURE_COLUMNS], train[target])
+    model.fit(training_rows[FEATURE_COLUMNS], training_rows[target])
     test_prediction = np.maximum(model.predict(test[FEATURE_COLUMNS]), 0)
-    baseline = np.repeat(float(train[target].median()), len(test))
+    baseline = np.repeat(float(training_rows[target].median()), len(test))
+    zero_baseline = np.zeros(len(test), dtype=float)
+    k = max(1, int(math.ceil(len(test) * 0.10)))
+    top_idx = np.argsort(test_prediction)[::-1][:k]
+    total_test_value = float(test[target].sum())
+    top10_value_share = float(test.iloc[top_idx][target].sum() / total_test_value * 100) if total_test_value > 0 else None
+    top10_lift = float(test.iloc[top_idx][target].mean() / test[target].mean()) if test[target].mean() > 0 else None
     r2_value = r2_score(test[target], test_prediction) if len(test) > 1 else None
     metrics = {
         "horizon_days": int(horizon_days),
@@ -79,9 +86,16 @@ def train_clv_horizon(snapshots: pd.DataFrame, scoring_features: pd.DataFrame,
         "rmse": float(mean_squared_error(test[target], test_prediction) ** 0.5),
         "r2": float(r2_value) if r2_value is not None and np.isfinite(r2_value) else None,
         "median_baseline_mae": float(mean_absolute_error(test[target], baseline)),
-        "interpretation": "Predicted future customer-paid order value; not contribution margin or net profit CLV.",
+        "zero_baseline_mae": float(mean_absolute_error(test[target], zero_baseline)),
+        "zero_baseline_rmse": float(mean_squared_error(test[target], zero_baseline) ** 0.5),
+        "test_nonzero_target_pct": float((test[target] > 0).mean() * 100),
+        "top10_future_value_share_pct": top10_value_share,
+        "top10_value_lift": top10_lift,
+        "validation_training_rows": int(len(training_rows)),
+        "interpretation": "Predicted future customer-paid order value; not contribution margin or net profit CLV. Compare pointwise errors with the zero baseline and treat top-decile capture as a ranking diagnostic.",
     }
-    model.fit(snapshots[FEATURE_COLUMNS], snapshots[target])
+    final_training_rows = snapshots.sample(n=min(30000, len(snapshots)), random_state=42) if len(snapshots) > 30000 else snapshots.copy()
+    model.fit(final_training_rows[FEATURE_COLUMNS], final_training_rows[target])
     score = scoring_features[["customer_unique_id", "snapshot_date", *FEATURE_COLUMNS]].copy()
     score[f"predicted_paid_value_{horizon_days}d"] = np.maximum(
         model.predict(score[FEATURE_COLUMNS]), 0

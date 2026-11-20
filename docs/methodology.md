@@ -51,3 +51,16 @@ The model targets future customer-paid order value over 90, 180 and 365 days. A 
 ## Marketing and intervention economics
 
 CAC and ROAS require genuine campaign spend and acquisition data. The Olist dataset does not provide these inputs. Churn probability multiplied by predicted future paid value is a value-at-risk ranking proxy, not expected saved value. Treatment effectiveness requires randomized experiments or uplift modeling.
+
+
+## Supplied archive cleaning
+
+- Four blank export-only `Unnamed` columns were removed from the order_items table after confirming they contained no usable values.
+- The archive also included seller-side marketing-qualified-lead and closed-deal tables; these are profiled but are not buyer acquisition-cost data.
+- The large geolocation table is not loaded by the core pipeline because geographic analysis is outside the current project scope.
+
+## Observed model diagnostics
+
+The supplied run produced a 98.27% churn-positive prevalence in the temporal holdout, ROC-AUC 0.612 and lift@10% 1.009. This indicates weak discrimination for prioritization despite a high average-precision value driven by the base rate.
+
+Future paid-value targets are sparse. Pointwise MAE is worse than a zero baseline, while the top 10% of predicted values captures 20.52% (90d), 25.08% (180d) and 23.21% (365d) of test-period paid value. Use these as exploratory ranking diagnostics only.

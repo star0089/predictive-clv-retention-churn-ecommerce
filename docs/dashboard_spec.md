@@ -30,13 +30,15 @@ Source: cohort_retention.csv
 ### 4. Churn risk
 Source: churn_risk_predictions.csv and churn_model_metrics.json
 - Risk probability distribution
-- High/medium/lower relative risk bands
+- High/medium/lower relative rank bands (not calibrated business thresholds)
 - Precision@10%, recall@10%, lift@10%, average precision and Brier score
+- Show the observed 98.27% churn prevalence and weak ROC-AUC (0.612) / lift@10% (1.009) beside scores; current model is not production-ready
 - Never show the risk score without its 240-day target definition.
 
 ### 5. Future customer value
 Source: future_paid_value_predictions.csv and paid_value_model_metrics.json
 - Predicted 90d, 180d and 365d customer-paid value
+- Show the zero-value baseline comparison and top-decile value capture; do not imply pointwise forecast accuracy
 - Paid value at risk proxy = churn probability × predicted 365d paid value
 - 730d / 24-month value is unavailable and must not be visualized as zero.
 

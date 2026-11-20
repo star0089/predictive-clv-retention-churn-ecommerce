@@ -36,3 +36,14 @@ Review score, purchase frequency, recency and spend are observational. Correlati
 ## Model evaluation
 
 The historical dataset is small relative to a production marketplace and contains very few repeat buyers. Time-based snapshot evaluation can still contain repeated customer identities across snapshots. Performance should be considered portfolio research, not production-grade evidence.
+
+
+## Observed model limitations from the supplied archive
+
+- The 240-day no-return target had **98.27%** positive prevalence in the chronological test set. ROC-AUC was **0.612** and lift@10% was **1.009**. The current churn model is not sufficiently discriminative for CRM targeting.
+- Future paid-value targets are sparse: only **0.77%**, **1.34%** and **2.56%** of 90-, 180- and 365-day test rows had non-zero future paid value.
+- Pointwise MAE was worse than the zero-value baseline for all three horizons. Top-decile value capture was **20.52%**, **25.08%** and **23.21%**, respectively. This may support exploratory ranking but is not evidence of accurate individual CLV.
+- The 365-day evaluation uses one held-out monthly snapshot and is especially fragile.
+- The churn and CLV snapshot validation can contain the same customer in multiple dates; it is chronological but not customer-group independent.
+- The Olist archive includes seller-side marketing-qualified leads and closed deals. These are not buyer-level acquisition-cost or campaign-spend records and cannot be used as buyer CAC/ROAS.
+

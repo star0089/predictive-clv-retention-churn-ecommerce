@@ -40,5 +40,19 @@
 - Added 90-, 180- and 365-day future customer-paid-value modeling; 730-day value remains unavailable due to insufficient reliable follow-up.
 - Raw datasets, generated outputs and fitted models remain excluded from Git.
 
+## 2026-11-20 — Supplied dataset execution and validation
+- Received and inspected the user's Olist archive (11 CSV files).
+- Loaded 10 relevant source tables; excluded the large geolocation table because geographic analysis is outside the current CLV scope.
+- Removed four blank export-only `Unnamed` columns from order_items.
+- Ran the complete pipeline successfully using delivered orders and customer_unique_id as the customer grain.
+- Canonical population: 96,478 delivered orders, 93,358 persistent customers, 2,801 repeat customers (3.00%).
+- Generated customer master/RFM, cohort retention, churn snapshots, churn scores, future paid-value predictions, feature importance, and dashboard export locally.
+- Churn model: 168,970 snapshots; test prevalence 98.27%; ROC-AUC 0.612; lift@10% 1.009. Marked not production-ready for retention targeting.
+- Future paid-value models: 90d, 180d and 365d; top-decile value capture 20.52%, 25.08% and 23.21%. Pointwise MAE remains worse than a zero baseline; these are exploratory ranking signals.
+- 730-day paid value remains unavailable. Buyer CAC/ROAS and contribution-margin CLV remain unavailable because the source does not contain buyer-level campaign spend or full cost data.
+- Optimized snapshot feature engineering to avoid repeated full-history sorting and reduced model sizes so the pipeline runs within constrained environments.
+- Ran automated tests: **5 passed**.
+- Added aggregate data-quality, RFM, cohort and model-evaluation reports. Customer-level exports and fitted model artifacts remain excluded from Git.
+
 ## Validation status
-The repository implementation has been authored but has **not yet been run end-to-end against the user's local Olist CSV files**. No pipeline metrics, model scores or generated customer outputs are claimed until that run succeeds.
+The end-to-end pipeline completed successfully against the supplied Olist archive. The automated unit tests passed (5/5). Churn and future-value model limitations are documented; no claim of production readiness, causal retention uplift, profit CLV, CAC or ROAS is made.

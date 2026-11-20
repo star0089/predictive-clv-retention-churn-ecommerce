@@ -4,6 +4,8 @@ data/
 *.csv
 *.xlsx
 *.parquet
+*.zip
+!reports/*.csv
 
 # Generated outputs and fitted models
 outputs/

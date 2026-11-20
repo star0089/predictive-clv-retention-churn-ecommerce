@@ -15,6 +15,9 @@ The project uses the public Olist Brazilian E-Commerce dataset. The raw CSV file
 | olist_products_dataset.csv | Product | product_id | Optional category enrichment |
 | olist_sellers_dataset.csv | Seller | seller_id | Optional seller analysis |
 | product_category_name_translation.csv | Category translation | product_category_name | Optional readable category names |
+| olist_marketing_qualified_leads_dataset.csv | One seller-side marketing-qualified lead | mql_id | Profiled only; not buyer acquisition spend |
+| olist_closed_deals_dataset.csv | One seller-side closed deal | mql_id, seller_id | Profiled only; not buyer CAC or marketplace revenue |
+| olist_geolocation_dataset.csv | One ZIP-prefix geolocation record | geolocation_zip_code_prefix | Not loaded by the core pipeline; outside current scope |
 
 ## Key grain decisions
 
@@ -39,4 +42,4 @@ The standard Olist dataset does not contain the following business tables from t
 - product cost of goods and true fulfilment cost
 - loyalty membership lifecycle
 
-These must not be fabricated. The project documents their absence and provides a place to add compatible external data if legitimately obtained.
+These must not be fabricated. The archive does include seller-side marketing-qualified leads and closed deals, but these relate to seller acquisition, not the marketplace's buyer acquisition campaigns or buyer-level CAC. The large geolocation table is intentionally not loaded by the core pipeline. The project documents these boundaries and provides a place to add compatible external data if legitimately obtained.
